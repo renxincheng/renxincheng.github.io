@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.0/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"8.0.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}};
+  </script>
+
+<link rel="stylesheet" href="/js/prism/prism.css">
+
+  <meta name="description" content="如何建立一个个人软件包仓库(PPA)">
+<meta property="og:type" content="article">
+<meta property="og:title" content="如何建立一个个人软件包仓库(PPA)">
+<meta property="og:url" content="http://example.com/2020/09/07/how-to-setup-ubuntu-software-ppa-repo/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="如何建立一个个人软件包仓库(PPA)">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://zpj.io/wp-content/uploads/2020/10/ppa-software-resources.png">
+<meta property="og:image" content="https://zpj.io/wp-content/uploads/2020/10/gpg-success.png">
+<meta property="og:image" content="https://zpj.io/wp-content/uploads/2020/10/ppa-software-resources-del.png">
+<meta property="article:published_time" content="2020-09-07T09:10:26.000Z">
+<meta property="article:modified_time" content="2020-10-23T09:00:33.000Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="Setup">
+<meta property="article:tag" content="Ubuntu">
+<meta property="article:tag" content="3rd-party PPA">
+<meta property="article:tag" content="apt install">
+<meta property="article:tag" content="Software Source">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zpj.io/wp-content/uploads/2020/10/ppa-software-resources.png">
+
+
+<link rel="canonical" href="http://example.com/2020/09/07/how-to-setup-ubuntu-software-ppa-repo/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>如何建立一个个人软件包仓库(PPA) | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml"><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Hexo</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%93%8D%E4%BD%9C%E5%B9%B3%E5%8F%B0"><span class="nav-number">1.</span> <span class="nav-text">1.操作平台</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E8%BD%AF%E4%BB%B6%E4%BB%93%E5%BA%93%E7%AE%80%E4%BB%8B"><span class="nav-number">2.</span> <span class="nav-text">2.软件仓库简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E9%85%8D%E7%BD%AE%E4%BF%A1%E6%81%AF%E7%94%9F%E6%88%90"><span class="nav-number">3.</span> <span class="nav-text">3.配置信息生成</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E5%87%86%E5%A4%87%E6%93%8D%E4%BD%9C"><span class="nav-number">3.1.</span> <span class="nav-text">1.准备操作</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-dists%E7%9B%AE%E5%BD%95%E4%B8%AD%E4%BF%A1%E6%81%AF%E6%96%87%E4%BB%B6%E7%9A%84%E7%94%9F%E6%88%90"><span class="nav-number">3.2.</span> <span class="nav-text">2.dists目录中信息文件的生成</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-packages%E6%96%87%E4%BB%B6%E7%94%9F%E6%88%90"><span class="nav-number">3.2.1.</span> <span class="nav-text">1.packages文件生成</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-contents%E6%96%87%E4%BB%B6%E7%94%9F%E6%88%90"><span class="nav-number">3.2.2.</span> <span class="nav-text">2.contents文件生成</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-apt-conf%E6%96%87%E4%BB%B6%E5%88%B6%E4%BD%9C"><span class="nav-number">3.2.3.</span> <span class="nav-text">3.apt.conf文件制作</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-release%E6%96%87%E4%BB%B6%E7%94%9F%E6%88%90"><span class="nav-number">3.2.4.</span> <span class="nav-text">4.release文件生成</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#5-Release-gpg%E6%96%87%E4%BB%B6"><span class="nav-number">3.2.5.</span> <span class="nav-text">5.Release.gpg文件</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-project%E7%9B%AE%E5%BD%95%E4%B8%AD%E4%BF%A1%E6%81%AF%E6%96%87%E4%BB%B6%E7%9A%84%E7%94%9F%E6%88%90"><span class="nav-number">3.3.</span> <span class="nav-text">3. project目录中信息文件的生成</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-ppa-public-key-gpg%E5%85%AC%E9%92%A5%E5%AF%BC%E5%87%BA"><span class="nav-number">3.3.1.</span> <span class="nav-text">1.ppa-public-key.gpg公钥导出</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-Release-gpg%E6%96%87%E4%BB%B6%E7%94%9F%E6%88%90-%E6%9C%80%E7%BB%88%E7%94%9F%E6%88%90%E5%90%8E%E5%AD%98%E6%94%BE%E5%9C%A8dists-stable%E7%9B%AE%E5%BD%95%E4%B8%AD"><span class="nav-number">3.3.2.</span> <span class="nav-text">2.Release.gpg文件生成(最终生成后存放在dists&#x2F;stable目录中)</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E4%BD%BF%E7%94%A8%E5%AE%9A%E5%88%B6%E8%BD%AF%E4%BB%B6%E4%BB%93%E5%BA%93%E5%AE%89%E8%A3%85%E8%BD%AF%E4%BB%B6"><span class="nav-number">4.</span> <span class="nav-text">4.使用定制软件仓库安装软件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E6%B7%BB%E5%8A%A0%E5%AF%86%E9%92%A5"><span class="nav-number">4.1.</span> <span class="nav-text">1.添加密钥</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%EF%BC%92-%E6%B7%BB%E5%8A%A0%E8%BD%AF%E4%BB%B6%E4%BB%93%E5%BA%93"><span class="nav-number">4.2.</span> <span class="nav-text">２.添加软件仓库</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E7%A7%BB%E9%99%A4%E5%AF%86%E9%92%A5%E4%BB%A5%E5%8F%8A%E8%BD%AF%E4%BB%B6%E4%BB%93%E5%BA%93"><span class="nav-number">4.3.</span> <span class="nav-text">3.移除密钥以及软件仓库</span></a></li></ol></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">John Doe</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives">
+          <span class="site-state-item-count">3</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">categories</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </section>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/renxincheng" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+      
+
+      
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/09/07/how-to-setup-ubuntu-software-ppa-repo/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          如何建立一个个人软件包仓库(PPA)
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2020-09-07 17:10:26" itemprop="dateCreated datePublished" datetime="2020-09-07T17:10:26+08:00">2020-09-07</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">Edited on</span>
+        <time title="Modified: 2020-10-23 17:00:33" itemprop="dateModified" datetime="2020-10-23T17:00:33+08:00">2020-10-23</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Research/" itemprop="url" rel="index"><span itemprop="name">Research</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+            <div class="post-description">如何建立一个个人软件包仓库(PPA)</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>This is an article written by my student Xincheng Ren. He helps me setup the Ubuntu software repository for PicoScenes.</p>
+<hr>
+<p>本文将介绍如何在linux服务器上构建一个属于你自己的第三方软件仓库(Personal Package Archives，简称PPA)，构建完成之后，其他人将可以像安装linux官方源中的软件那样在命令行中安装你定制的软件。而和官方官方软件仓库稍微不同的是，需要首先添加你的软件源，之后便可以使用sudo apt update &amp;&amp; sudo apt install xxx来进行安装你的软件。</p>
+<h3 id="1-操作平台"><a href="#1-操作平台" class="headerlink" title="1.操作平台"></a>1.操作平台</h3><p>安装了Ubuntu20.04的服务器</p>
+<h3 id="2-软件仓库简介"><a href="#2-软件仓库简介" class="headerlink" title="2.软件仓库简介"></a>2.软件仓库简介</h3><p>很多人可能都在自己的电脑上更改过自己的软件源，以获得更快的软件下载速度，更改不同的源就对应着不同的软件仓库。比如Linux mint可以打开软件源(Software Resources)，通过测速和更改镜像源来比较获得一个更快的软件下载源，如图1所示：</p>
+<p><img src="https://zpj.io/wp-content/uploads/2020/10/ppa-software-resources.png"></p>
+<p>图1-软件源</p>
+<p>更改源之后，可以执行sudo apt update &amp;&amp; sudo apt upgrade，可以发现下载软件速度明显提高。在更改官方源，update和upgrade时，在系统内部都进行了什么操作呢？<br>三步操作都各自完成了一个具体的操作：<br>1.更改官方源。每一个linux系统都有一个或者多个存放源的文件，比如在Linux mint20.04中，文件的完整路径为(对于不同的linux发行版存放软件源的文件可能有所区别，需要根据自己的系统具体查询)：/etc/apt/sources.list.d/official-package-repositories.list，在official-package-repositories.list中的内容如下(假设主要(ulyana)源和基础(focal)源均改为清华源)：</p>
+<pre class="line-numbers language-none"><code class="language-none">deb https:&#x2F;&#x2F;mirrors.tuna.tsinghua.edu.cn&#x2F;linuxmint ulyana main upstream import backport 
+
+deb http:&#x2F;&#x2F;mirrors.tuna.tsinghua.edu.cn&#x2F;ubuntu focal main restricted universe multiverse
+deb http:&#x2F;&#x2F;mirrors.tuna.tsinghua.edu.cn&#x2F;ubuntu focal-updates main restricted universe multiverse
+deb http:&#x2F;&#x2F;mirrors.tuna.tsinghua.edu.cn&#x2F;ubuntu focal-backports main restricted universe multiverse
+
+deb http:&#x2F;&#x2F;security.ubuntu.com&#x2F;ubuntu&#x2F; focal-security main restricted universe multiverse
+deb http:&#x2F;&#x2F;archive.canonical.com&#x2F;ubuntu&#x2F; focal partner<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>由上可知，更改源是更改了第一行，第三四五行的内容。更改之后update和upgrade时查询软件仓库的地址即为清华源所对应的目录。而对于一些不在清华源的软件，则会从ubuntu官方的源仓库来进行安装。<br>2.update。在更改源之后进行，具体操作为查询软件仓库中的Release文件，InRelease文件以及文件的一些配置信息，数字签名等等。最重要的一点，对比软件仓库中的软件信息文件，是否有版本更新，然后在update查询之后显示有多少软件可以进行更新。<br>3.upgrade。在update更新之后，如果有软件可以更新，则从所更改的软件源来进行下载安装所有可以更新的软件。</p>
+<p>假设你要构建一个包含三个deb包的软件仓库，分别first.deb，second.deb和single.deb，架构全部为amd64，其中的依赖关系为second.deb依赖first.deb，而first.deb和single.deb不依赖任何包。对于常见的linux软件仓库来说，其完成构建时，软件仓库的目录大致如下：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">├── dists
+│   └── stable
+│       ├── Contents-amd64.gz
+│       ├── Release
+│       ├── Release.gpg
+│       ├── apt.conf
+│       └── main
+│           └── binary-amd64
+│               ├── Packages
+│               └── Packages.gz
+├── pool
+│   └── main
+│       ├── first.deb
+│       ├── second.deb
+│       ├── single.deb
+└── project
+     └── ppa-public-key.gpg<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>典型的ubuntu仓库有dists目录和pool目录，dists中存放关于软件包的一些信息，如依赖关系，文件大小，所需要的系统架构等等；pool中存放实际要安装的deb包，实际的软件仓库一般main一个目录，可以按照自己的需要进行添加。对于大多数非官方仓库，会多一个project目录，其中存放服务器上导出的公钥文件，当公钥文件导入到系统中时，系统才会认为来自这个服务器的文件是安全的。</p>
+<p>更改源可以简单理解为更改安装软件的地址，从不同的网络地址下载软件的速度是不一样的；update则可以简单理解为查询软件包的一系列参数。upgrade和install则可以理解为从安装软件的地址下载软件并安装在本机。从软件安装的角度来说，上述三步是简化了安装软件的步骤，这和你从软件源地址下载deb包点击安装得到的效果是一样的。</p>
+<h3 id="3-配置信息生成"><a href="#3-配置信息生成" class="headerlink" title="3.配置信息生成"></a>3.配置信息生成</h3><p>假设你在服务器端已经有了first.deb，second.deb和single.deb这三个deb包。则对应于上一节的三个目录dists，pool和project我们已经完成了pool目录中文件的生成。接下来我们需要在服务器端进行一些修改，从而来生成dists和project中的内容。</p>
+<h4 id="1-准备操作"><a href="#1-准备操作" class="headerlink" title="1.准备操作"></a>1.准备操作</h4><p>1.安装apache2服务器，具体操作参考上一文。<br>2.创建软件仓库所需要的文件夹，并将前面准备的三个deb包复制到/var/www/html/pool/main目录，预期的效果为：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">上层目录为/var/www/html
+├── dists
+│   └── stable
+│       └── main
+│           └── binary-amd64
+├── pool
+│   └── main
+│       ├── first.deb
+│       ├── second.deb
+│       ├── single.deb
+└── project<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>3.安装配置信息生成文件必备软件：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 安装gpg</span>
+$ <span class="token function">sudo</span> <span class="token function">apt</span> <span class="token function">install</span> gpg
+
+<span class="token comment"># 安装rng-tools</span>
+$ <span class="token function">sudo</span> <span class="token function">apt</span> <span class="token function">install</span> rng-tools<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>gpg可以生成服务器公钥，并导出公钥文件，从而供其他用户导入。rng-tools可以加快gpg生成公钥时产生随机值的过程，否则可能会很久甚至服务器未响应都不会产生所需要的随机值。<br>4.确保你的服务器上有压缩软件，例如gzip。<br>5.假设下文中在服务器上的操作均为管理员用户。</p>
+<h4 id="2-dists目录中信息文件的生成"><a href="#2-dists目录中信息文件的生成" class="headerlink" title="2.dists目录中信息文件的生成"></a>2.dists目录中信息文件的生成</h4><p>以下的操作中，不做特殊说明，均在/var/www/html目录下进行，即在当前目录下列出文件或者查询工作目录的话，结果如下：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">$ <span class="token function">ls</span>
+dists  pool  project
+
+$ <span class="token builtin class-name">pwd</span>
+/var/www/html<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h5 id="1-packages文件生成"><a href="#1-packages文件生成" class="headerlink" title="1.packages文件生成"></a>1.packages文件生成</h5><p>调用格式为：apt-ftparchive packages deb包所在目录 &gt; Packages文件路径和文件名。<br>例如如下命令格式：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 生成packages文件</span>
+$ apt-ftparchive packages pool/main <span class="token operator">></span> dists/stable/main/binary-amd64/Packages<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<p>运行之后会在/var/www/html/dists/stable/main/binary-amd64目录下生成一个Packages文件。Packages中的内容类似如下：</p>
+<pre class="line-numbers language-none"><code class="language-none">Package: picoscenes-driver
+Architecture: amd64
+Version: 20191229
+Priority: optional
+Section: network
+Source: picoscenes-driver
+Maintainer: Zhiping Jiang &lt;zpj@xidian.edu.cn&gt;
+Installed-Size: 2763
+Depends: linux-image-5.4.0-45-generic
+Filename: pool&#x2F;main&#x2F;picoscenes-driver-20191229.deb
+Size: 619152
+MD5sum: 58b9342be5bcea08c5b66cb2288c2fc7
+SHA1: bba0cf6070383b0b5c1e455dfc04b1f2e5af493f
+SHA256: 2faeb2d3dadaa6507ba1dc380ce5e23889263ed03d21a654b2fc83954a3530d8
+SHA512: 5ddd2710086f5c441c97e5e011fec6317e412ba46e9845f1f758b5f5346675126dc1bff5bc98c815c6384bd1e6f2e8f6dc4f1b486beacf04f8c20ee67a8db259
+Homepage: https:&#x2F;&#x2F;zpj.io&#x2F;PicoScenes
+Description: PicoScenes Driver
+ This package contains the customized Qualcomm Atheros ar9300 (QCA9300) and Intel Wireless Link 5300 (IWL5300) Wi-Fi drivers for PicoScenes system. To reduce the maintainance work, this driver is ONLY compatible with kernel verion: 5.4.0-45-generic.
+
+Package: picoscenes-platform
+Architecture: amd64
+Version: 2020.0816.1248
+Priority: optional
+Section: devel
+Maintainer: Zhiping Jiang&lt;zpj@xidian.edu.cn&gt;
+Installed-Size: 10340
+Depends: picoscenes-driver, build-essential, libboost-all-dev, openjdk-8-jre, libcpprest-dev, libssl-dev, net-tools, p7zip-full, hostapd, cpufrequtils, libsodium23, libfmt-dev, uhd-host, libopenblas-base
+Filename: pool&#x2F;main&#x2F;picoscenes-platform-2020.0816.1248-Linux.deb
+Size: 3395486
+MD5sum: 4888b72822ee635507b75c9cb3c7aa8e
+SHA1: 16ba5232fbc734e3da77af0685a9e092a0a6c0bd
+SHA256: 6ddee9f2936eb25c341f717aeaff67d69eb39d43f7e1e9227f382018697e0238
+SHA512: 1dcaa0b05fbc8e2cf0893b18279d3446e693762e14b8b9981079b3da3edf7b6992fb71bfb350e39e22b179144f1118ce370bd3f70ed2f1eb1ce9361c1055a026
+Homepage: https:&#x2F;&#x2F;zpj.io&#x2F;PicoScenes
+Description: PicoScenes Platform 
+ PicoScenes Platform, depending on PicoScenes Driver, wraps all the low-level Wi-Fi NIC controls into a bunch of powerful APIs for the atop PicoScenes plug-in subsystem.
+
+Package: picoscenes-plugins-demo-rxsbroadcaster-echoprobe
+Architecture: amd64
+Version: 20.0718.0252
+Priority: optional
+Section: devel
+Maintainer: Zhiping Jiang&lt;zpj@xidian.edu.cn&gt;
+Installed-Size: 1153
+Depends: picoscenes-platform
+Filename: pool&#x2F;main&#x2F;picoscenes-plugins-demo-rxsbroadcaster-echoprobe-20.0718.0252-Linux.deb
+Size: 349528
+MD5sum: 2b61bf7bfced4632148b79d87908d13c
+SHA1: 418452d5f64342e960aa35cee5bb59ea8c401794
+SHA256: 063f67584a2fcdcfb46c5b9a21eb99d4af19c9ec104d0b40c8f0a2078ba44a53
+SHA512: cbb301e0bc46783966b7b719f8c99f8e668efdf64b3a26b3ae89016762135f0cae52a3a20b20e193dcd77145074896f51acc8f83a1e41d4a87cc7b412479d725
+Homepage: https:&#x2F;&#x2F;zpj.io&#x2F;PicoScenes
+Description: Three Sample Plug-Ins of PicoScenes System. 
+ The plug-ins are: EchoProbe, us-level round-trip CSI measurement in UWB spectrum; RXS-Broadcaster, RxS data forwarding to the remote via UDP protocol; and Demo, the sample code of PicoScenes Plug-In Development Kit (PSPDK).<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>对于你自己的deb仓库，生成的文件会有所不同，但是所拥有的参数都是类似的，例如Package，Source， Version，Architecture，和Maintainer等等，这些参数都是在deb文件中的control文件中的信息。还有一些是在control文件中所没有的，例如Filename，Size，MD5sum等等，这些都是apt-ftarchive packages所新生成的，主要起了对比文件信息的作用，例如如果软件仓库中的文件大小和packages文件中登记的文件大小不一样的时候，会报错，如下所示：</p>
+<pre class="line-numbers language-none"><code class="language-none">Get:1  https:&#x2F;&#x2F;服务器地址&#x2F; stable main amd64 picoscenes-driver amd64 20191229 [619 kB]
+Err:1  https:&#x2F;&#x2F;服务器地址&#x2F; stable main amd64 picoscenes-driver amd64 20191229
+  Hash Sum mismatch
+  Hashes of expected file:
+
+   -SHA512:5ddd2710086f5c441c97e5e011fec6317e412ba46e9845f1f758b5f5346675126dc1bff5bc98c815c6384bd1e6f2e8f6dc4f1b486beacf04f8c20ee67a8db259
+   - SHA256:2faeb2d3dadaa6507ba1dc380ce5e23889263ed03d21a654b2fc83954a3530d8
+   - SHA1:bba0cf6070383b0b5c1e455dfc04b1f2e5af493f [weak]
+   - MD5Sum:58b9342be5bcea08c5b66cb2288c2fc7 [weak]
+   - Filesize:619152 [weak]
+     Hashes of received file:
+   - SHA512:f3bf69496b2f86f9a2a6d69baa3a19cacba20e7125251c922894725603a4e11cec764200ec8207d000033880086530a47e632dcadef0979cf716d7d05e377cf7
+   - SHA256:aa768f83bca305c3979399589bbdc0521804401017dda001ea9171517291cedb
+   - SHA1:1b03162a6336a58d253b8f919be041b360b04ae7 [weak]
+   - MD5Sum:83d4771518c082731bd40e253af4e7f8 [weak]
+   - Filesize:618820 [weak]
+     Last modification reported: Sat, 15 Aug 2020 02:11:56 +0000
+     E: Failed to fetch  https:&#x2F;&#x2F;服务器地址&#x2F;pool&#x2F;main&#x2F;picoscenes-driver-20191229.deb  Hash Sum mismatch
+        Hashes of expected file:
+         - SHA512:5ddd2710086f5c441c97e5e011fec6317e412ba46e9845f1f758b5f5346675126dc1bff5bc98c815c6384bd1e6f2e8f6dc4f1b486beacf04f8c20ee67a8db259
+         - SHA256:2faeb2d3dadaa6507ba1dc380ce5e23889263ed03d21a654b2fc83954a3530d8
+         - SHA1:bba0cf6070383b0b5c1e455dfc04b1f2e5af493f [weak]
+         - MD5Sum:58b9342be5bcea08c5b66cb2288c2fc7 [weak]
+         - Filesize:619152 [weak]
+        Hashes of received file:
+         - SHA512:f3bf69496b2f86f9a2a6d69baa3a19cacba20e7125251c922894725603a4e11cec764200ec8207d000033880086530a47e632dcadef0979cf716d7d05e377cf7
+         - SHA256:aa768f83bca305c3979399589bbdc0521804401017dda001ea9171517291cedb
+         - SHA1:1b03162a6336a58d253b8f919be041b360b04ae7 [weak]
+         - MD5Sum:83d4771518c082731bd40e253af4e7f8 [weak]
+         - Filesize:618820 [weak]
+        Last modification reported: Sat, 15 Aug 2020 02:11:56 +0000
+     E: Unable to fetch some archives, maybe run apt-get update or try with --fix-missing?<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>在Packages文件生成之后，还要做一件事，将Packages文件压缩，存放在和Packages文件相同的目录中，如下：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 生成压缩包</span>
+$ <span class="token function">gzip</span> -9c dists/stable/main/binary-amd64/Packages <span class="token operator">></span> dists/stable/main/binary-amd64/Packages.gz<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<p>在本小节完成后，dists目录中的内容如下：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">├── dists
+│   └── stable
+│       └── main
+│           └── binary-amd64
+│               ├── Packages
+│               └── Packages.gz<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h5 id="2-contents文件生成"><a href="#2-contents文件生成" class="headerlink" title="2.contents文件生成"></a>2.contents文件生成</h5><p>调用格式为：apt-ftparchive contents deb包所在目录 &gt; contents文件路径和文件名。由于最终需要的是一个压缩文件，在上述命令进行调整，添加一个压缩文件的一步。<br>调整后的命令格式参考如下：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 生成contents文件</span>
+$ apt-ftparchive contents pool/main  <span class="token function">gzip</span> -9c <span class="token operator">></span> dists/stable/Contents-amd64.gz<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<p>由于在本文中的deb包架构为amd64，故需要生成一个名为Contents-amd64.gz，可根据自己的软件架构生成Contents-i386.gz或者Contents-armhf.gz。<br>contents文件中的内容为目录中的deb包中所有安装文件的绝对路径和文件名以及属于哪个deb包。如下所示为contents文件片段：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token punctuation">..</span>.
+usr/include/gmock/gmock-actions.h picoscenes-platform
+usr/include/gmock/gmock-cardinalities.h picoscenes-platform
+usr/include/gmock/gmock-function-mocker.h picoscenes-platform
+usr/include/gmock/gmock-generated-actions.h picoscenes-platform
+<span class="token punctuation">..</span>.
+usr/local/PicoScenes/plugins/libPDK-EchoProbe.so picoscenes-plugins-demo-rxsbroadcaster-echoprobe
+usr/local/PicoScenes/plugins/libPDK-demo.so picoscenes-plugins-demo-rxsbroadcaster-echoprobe
+usr/local/PicoScenes/plugins/libPlugIn-RXSBroadcaster.so picoscenes-plugins-demo-rxsbroadcaster-echoprobe
+<span class="token punctuation">..</span>.<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>在本小节完成后，dists目录中的内容如下：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">├── dists
+│   └── stable
+│       ├── Contents-amd64.gz
+│       └── main
+│           └── binary-amd64
+│               ├── Packages
+│               └── Packages.gz<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h5 id="3-apt-conf文件制作"><a href="#3-apt-conf文件制作" class="headerlink" title="3.apt.conf文件制作"></a>3.apt.conf文件制作</h5><p>atp.conf文件中主要包含了一些软件包的信息，可以参考如下形式，根据自己的需求创建apt.conf文件。若需要详细配置，则可以参考apt官方说明文档进行创建apt.conf文件，最终将apt.conf文件复制到和Contents-amd64.gz同样的目录，apt.conf参考内容如下：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">APT::FTPArchive::Release <span class="token punctuation">&#123;</span>
+Origin <span class="token string">"ubuntu"</span><span class="token punctuation">;</span>
+Label <span class="token string">"Ubuntu"</span><span class="token punctuation">;</span>
+Suite <span class="token string">"stable"</span><span class="token punctuation">;</span>
+Codename <span class="token string">"ulyana"</span><span class="token punctuation">;</span>
+Versin <span class="token string">"1.0"</span><span class="token punctuation">;</span>
+Architecture <span class="token string">"amd64"</span><span class="token punctuation">;</span>
+Components <span class="token string">"main"</span><span class="token punctuation">;</span>
+Description <span class="token string">"PicoScenes driver, platform, plugins and all."</span><span class="token punctuation">;</span>
+<span class="token punctuation">&#125;</span><span class="token punctuation">;</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>在本小节完成后，dists目录中的内容如下：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">├── dists
+│   └── stable
+│       ├── apt.conf
+│       ├── Contents-amd64.gz
+│       └── main
+│           └── binary-amd64
+│               ├── Packages
+│               └── Packages.gz<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h5 id="4-release文件生成"><a href="#4-release文件生成" class="headerlink" title="4.release文件生成"></a>4.release文件生成</h5><p>调用格式为：apt-ftparchive -c apt.conf路径 release dists下对应软件目录 &gt; dists下对应软件目录/Release。命令参考格式如下：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 生成release文件</span>
+$ apt-ftparchive -c dists/stable/apt.conf release dists/stable <span class="token operator">></span> dists/stable/Release<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<p>生成的Release文件内容形式如下所示：</p>
+<pre class="line-numbers language-none"><code class="language-none">Codename: ulyana
+Components: main
+Date: Tue, 08 Sep 2020 03:36:43 +0000
+Description: PicoScenes driver, platform, plugins and all.
+Label: Ubuntu
+Origin: ubuntu
+Suite: stable
+MD5Sum:
+ 4de5291165f3ddfdabd6b177f71a9d65             1749 Contents-amd64.gz
+ 1468f7b3232a231f6a0680036e21fd17              174 Release
+ ac956e2363b5d057c9fd507ba17b6f79             2860 main&#x2F;binary-amd64&#x2F;Packages
+ 26f29795d563b5cab3bdd0b84c4b238e             1466 main&#x2F;binary-amd64&#x2F;Packages.gz
+SHA1:
+ 38e46946208c73452b9208de8617e8904fb6b5bc             1749 Contents-amd64.gz
+ 31400d36f372bdae9de45e550a8cc657c6d659dc              174 Release
+ b9ee4d61fdba4a8fa6894dddd608485cf2ddcd21             2860 main&#x2F;binary-amd64&#x2F;Packages
+ 3497f0c023366edbba492473e8307c4c26e76a3b             1466 main&#x2F;binary-amd64&#x2F;Packages.gz
+SHA256:
+ addbcd1a4ef90fa4de802db680e0abb79552bf45697ef20533ab7f38b8988215             1749 Contents-amd64.gz
+ 7ddf81179c6d143f714e443c970e8b1390e1ac17462b070bf03eba68056d083a              174 Release
+ 3729fad154cf8748e03dd7356985139cabf98eac347c3c9cf686bc67e1795fce             2860 main&#x2F;binary-amd64&#x2F;Packages
+ 74c1888a9f6b82295dcea66b78f9f123ba87ab766d49652859c0c4e66aab5d9b             1466 main&#x2F;binary-amd64&#x2F;Packages.gz
+SHA512:
+ a86ff11bade4672403bd932eb092376fefb4bbc39774e234ec7c2ea48c5c62e3d4becd98c8c7f3abc1fb418df5b6c5981af69989a4df72b6bab3cc756e1a50a1             1749 Contents-amd64.gz
+ 4ec161deb1ad5107974ef7939e0a84f9650dd085633f8265796efc101c1b00058f5138a494d08594d11f9f18f45597cc73c78ebce7cd784090d7ff78052ee97d              174 Release
+ 3034171a9c06a3792915823019b9193ec62e5a3b50962330807aed677484b712ee79cd70a75e266fa41f246954180e315636e5a73456875abd1be407e64d1af2             2860 main&#x2F;binary-amd64&#x2F;Packages
+ 9175417730f4988ae29bda88af33fafae2dcbd428f194a34d150cd55a7cd5fcbaa360e54d9cbd874af9c9e923fa2ce529ebce2ae868e8e68ecc3287927421c5b             1466 main&#x2F;binary-amd64&#x2F;Packages.gz<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>在本小节完成后，dists目录中的内容如下：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">├── dists
+│   └── stable
+│       ├── apt.conf
+│       ├── Contents-amd64.gz
+│       ├── main
+│       │   └── binary-amd64
+│       │       ├── Packages
+│       │       └── Packages.gz
+│       └── Release<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h5 id="5-Release-gpg文件"><a href="#5-Release-gpg文件" class="headerlink" title="5.Release.gpg文件"></a>5.Release.gpg文件</h5><p>最终Release.gpg文件是要生成在和Release的同一目录下，同样也是dists目录下的一个文件。但是由于是需要用到gpg软件进行操作，目前还没使用到gpg软件，所以将生成Release.gpg文件的操作放在下一章。</p>
+<h4 id="3-project目录中信息文件的生成"><a href="#3-project目录中信息文件的生成" class="headerlink" title="3. project目录中信息文件的生成"></a>3. project目录中信息文件的生成</h4><p>以下的操作中，若不做特殊说明，均在/var/www/html目录下进行。</p>
+<h5 id="1-ppa-public-key-gpg公钥导出"><a href="#1-ppa-public-key-gpg公钥导出" class="headerlink" title="1.ppa-public-key.gpg公钥导出"></a>1.ppa-public-key.gpg公钥导出</h5><p>注意：在project目录下的ppa-public-key.gpg文件和之前提到的Release.gpg是不同的两个文件。<br>目前，你已经安装了gpg和rng-tools，使用gpg –list-keys可以查看当前所生成过的密钥，当未生成过密钥时，显示如下：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 显示密钥</span>
+$ gpg --list-keys
+$ <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<p>显示为空，则我们需要在服务器端生成一个密钥，使用gpg –full-generate-key来生成密钥，如下所示为生成过程：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 生成密钥</span>
+$ gpg --full-generate-key
+gpg <span class="token punctuation">(</span>GnuPG<span class="token punctuation">)</span> <span class="token number">2.2</span>.19<span class="token punctuation">;</span> Copyright <span class="token punctuation">(</span>C<span class="token punctuation">)</span> <span class="token number">2019</span> Free Software Foundation, Inc.
+This is <span class="token function">free</span> software: you are <span class="token function">free</span> to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+Please <span class="token keyword">select</span> what kind of key you want:
+   <span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span> RSA and RSA <span class="token punctuation">(</span>default<span class="token punctuation">)</span>
+   <span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">)</span> DSA and Elgamal
+   <span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span> DSA <span class="token punctuation">(</span>sign only<span class="token punctuation">)</span>
+   <span class="token punctuation">(</span><span class="token number">4</span><span class="token punctuation">)</span> RSA <span class="token punctuation">(</span>sign only<span class="token punctuation">)</span>
+  <span class="token punctuation">(</span><span class="token number">14</span><span class="token punctuation">)</span> Existing key from card
+Your selection? <span class="token number">1</span><span class="token punctuation">(</span>用户输入确认<span class="token punctuation">)</span>
+RSA keys may be between <span class="token number">1024</span> and <span class="token number">4096</span> bits long.
+What keysize <span class="token keyword">do</span> you want? <span class="token punctuation">(</span><span class="token number">3072</span><span class="token punctuation">)</span> <span class="token number">4096</span><span class="token punctuation">(</span>用户输入确认<span class="token punctuation">)</span>
+Requested keysize is <span class="token number">4096</span> bits
+Please specify how long the key should be valid.
+         <span class="token number">0</span> <span class="token operator">=</span> key does not expire
+      <span class="token operator">&lt;</span>n<span class="token operator">></span>  <span class="token operator">=</span> key expires <span class="token keyword">in</span> n days
+      <span class="token operator">&lt;</span>n<span class="token operator">></span>w <span class="token operator">=</span> key expires <span class="token keyword">in</span> n weeks
+      <span class="token operator">&lt;</span>n<span class="token operator">></span>m <span class="token operator">=</span> key expires <span class="token keyword">in</span> n months
+      <span class="token operator">&lt;</span>n<span class="token operator">></span>y <span class="token operator">=</span> key expires <span class="token keyword">in</span> n years
+Key is valid for? <span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span> <span class="token number">0</span><span class="token punctuation">(</span>用户输入确认<span class="token punctuation">)</span>
+Key does not expire at all
+Is this correct? <span class="token punctuation">(</span>y/N<span class="token punctuation">)</span> Y<span class="token punctuation">(</span>用户输入确认<span class="token punctuation">)</span>
+
+GnuPG needs to construct a user ID to identify your key.
+
+Real name: PPA-Demo<span class="token punctuation">(</span>用户输入确认<span class="token punctuation">)</span>
+Email address: XX@XXX.com<span class="token punctuation">(</span>用户输入确认<span class="token punctuation">)</span>
+Comment: NO<span class="token punctuation">(</span>用户输入确认<span class="token punctuation">)</span>
+You selected this <span class="token environment constant">USER</span>-ID:
+    <span class="token string">"PPA-Demo (NO) &lt;XX@XXX.com>"</span>
+
+Change <span class="token punctuation">(</span>N<span class="token punctuation">)</span>ame, <span class="token punctuation">(</span>C<span class="token punctuation">)</span>omment, <span class="token punctuation">(</span>E<span class="token punctuation">)</span>mail or <span class="token punctuation">(</span>O<span class="token punctuation">)</span>kay/<span class="token punctuation">(</span>Q<span class="token punctuation">)</span>uit? O
+We need to generate a lot of random bytes. It is a good idea to perform
+some other action <span class="token punctuation">(</span>type on the keyboard, move the mouse, utilize the
+disks<span class="token punctuation">)</span> during the prime generation<span class="token punctuation">;</span> this gives the random number
+generator a better chance to gain enough entropy.
+<span class="token punctuation">(</span>会弹出一个窗口让你提示输入公钥密码以及重复一遍密码，如下<span class="token punctuation">)</span>     
+ │ Please enter the passphrase to                       │                     
+ │ protect your new key                                 │                     
+ │                                                      │                     
+ │ Passphrase: ________________________________________ │                     
+ │                                                      │                     
+ │       <span class="token operator">&lt;</span>OK<span class="token operator">></span>                              <span class="token operator">&lt;</span>Cancel<span class="token operator">></span>     │                 
+（假设输入的密码为PPAPwd并确认）
+We need to generate a lot of random bytes. It is a good idea to perform
+some other action <span class="token punctuation">(</span>type on the keyboard, move the mouse, utilize the
+disks<span class="token punctuation">)</span> during the prime generation<span class="token punctuation">;</span> this gives the random number
+generator a better chance to gain enough entropy.
+（上述显示在产生随机值，由于之前已经安装了rng-tools，所以产生随机值花费的时间不多，若未安装rng-tools，则此过程会十分漫长）
+gpg: key 7B2677D04250EA0E marked as ultimately trusted
+gpg: revocation certificate stored as <span class="token string">'/root/.gnupg/openpgp-revocs.d/DF431E9AFB953A977D83071A7B2677D04250EA0E.rev'</span>
+public and secret key created and signed.
+
+pub   rsa4096 <span class="token number">2020</span>-09-08 <span class="token punctuation">[</span>SC<span class="token punctuation">]</span>
+      DF431E9AFB953A977D83071A7B2677D04250EA0E
+uid                      PPA-Demo <span class="token punctuation">(</span>NO<span class="token punctuation">)</span> <span class="token operator">&lt;</span>XX@XXX.com<span class="token operator">></span>
+sub   rsa4096 <span class="token number">2020</span>-09-08 <span class="token punctuation">[</span>E<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>此时再次显示密钥：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 显示公钥</span>
+$ gpg --list-keys
+/root/.gnupg/pubring.kbx
+------------------------
+pub   rsa4096 <span class="token number">2020</span>-09-08 <span class="token punctuation">[</span>SC<span class="token punctuation">]</span>
+      DF431E9AFB953A977D83071A7B2677D04250EA0E
+uid           <span class="token punctuation">[</span>ultimate<span class="token punctuation">]</span> PPA-Demo <span class="token punctuation">(</span>NO<span class="token punctuation">)</span> <span class="token operator">&lt;</span>XX@XXX.com<span class="token operator">></span>
+sub   rsa4096 <span class="token number">2020</span>-09-08 <span class="token punctuation">[</span>E<span class="token punctuation">]</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>至此，我们完成了在服务器端生成密钥的操作，接下来就要导出密钥文件到project，操作命令如下：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 导出公钥文件</span>
+$ gpg --export  <span class="token operator">></span> project/ppa-public-key.gpg<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<p>在本小节完成后，project目录中的内容如下：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">└── project
+    └── ppa-public-key.gpg<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<h5 id="2-Release-gpg文件生成-最终生成后存放在dists-stable目录中"><a href="#2-Release-gpg文件生成-最终生成后存放在dists-stable目录中" class="headerlink" title="2.Release.gpg文件生成(最终生成后存放在dists/stable目录中)"></a>2.Release.gpg文件生成(最终生成后存放在dists/stable目录中)</h5><p>注意：本节的操作必须在Release文件生成后和密钥生成之后才可以进行，否则会出错。<br>调用格式为：gpg –passphrase ‘PPAPwd’ –pinentry-mode loopback –output dists/stable/Release.gpg -abs dists/stable/Release。如下：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 生成Release.gpg文件</span>
+$ gpg --passphrase <span class="token string">"PPAPwd"</span> --pinentry-mode loopback --output dists/stable/Release.gpg -abs dists/stable/Release<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<p>本条命令有点复杂，可以根据参数和值的顺序来进行分析：<br>命令开始于gpg，表示使用gpg软件中的gpg命令；<br>第一个参数为–passphrase，表示密钥的密码，即在–full-generate-key一步中输入的密码，在这里密码为：PPAPwd；<br>第二个参数为–pinentry-mode，表示设置pinentry的模式，在这里设置为loopback，表示可以使用–passphrase所提供的密码，从而可以实现不弹出界面而输入密钥密码，使之可以用脚本在服务器端导出公钥文件；<br>第三个参数为–output，表示写入到文件，值为dists/stable/Release.gpg。<br>第四个参数为-abs，包含–armor，–detach-sign和–sign(–clear-sign)三个参数，–armor表示输出一个以ascii编码的文件，其余两个参数表示签名。值为dists/stable/Release，表示使用之前生成的Release文件。</p>
+<p>以上参数的详细含义可以通过：man gpg &gt; gpg帮助手册。来进行查看。<br>最终生成的文件内容形式如下：</p>
+<pre class="line-numbers language-none"><code class="language-none">-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEk5EedDfs91PXpQSCKfS6vV0k7tIFAl9XJBcACgkQKfS6vV0k
+7tIDJA&#x2F;+JA&#x2F;aE5TuSwZ3TY9jXlLZ7jN1vzmZ3kYrYf9u8YRfcuApiS8zt1gc8R8g
+o3qvy8Cnc2ifVJai1fnmfCNDOR3LQru6VWfNJqRiO&#x2F;GHqc3IYsU2prNDJV+jXp57
+d0g3nLqKeCNlWgqxzvvcDC1wsZwiwMrjXxdNQXPWYolo79udmhPlW2lfQLnQfGDE
+OqP5qlDPTMvO3Agd+hDvel4T9wCha1QYc97vC369lb&#x2F;wUUkzVSp6arOEN8iTu3fM
+fGEl9O6dPCocDLaQGiSiepQiShoxDCE4d9McE2XQ2c4n1rwaYqlx6NckaM&#x2F;PH8PL
+1&#x2F;oJNx0ocVZd4SDttYh9Ir6yRKJppOZ7hbv64+xTEKcvKNTaTvXC85NVr&#x2F;6Q7d+W
+Peyn0wVuMfmzHcbgZ6ckwjv9GMUlKtp&#x2F;TL18xuUFMxI72tzSItmpH7&#x2F;2aqI5q3NR
+vVIy7NlDnDKjalrGsiQWOZb9jJAVacYzqN1SkDjK0Dt6WAQtRMSVq9y9fbjIBR7g
+MNwCAQs8wMSLPcehMrpi6Ny6om3FMeoZ4G2p4IVhPSeVUIRjowF+h7eLjASCGQpH
+kjzUaEgUqXvpXuZxmXT2qLJcxhiDQR9qqCDTpuo1Ps8XdcR4gjtYemSTc&#x2F;3QkXlK
+GDGpCRdyndN&#x2F;WRvqq2dhT&#x2F;zkUTAZtao7ijqZFbnthNftTn5j06w&#x3D;
+&#x3D;Wk3o
+-----END PGP SIGNATURE-----<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>到此为止，一个完整的PPA仓库创建完成。此时，目录结构如下：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash">├── dists
+│   └── stable
+│       ├── apt.conf
+│       ├── Contents-amd64.gz
+│       ├── main
+│       │   └── binary-amd64
+│       │       ├── Packages
+│       │       └── Packages.gz
+│       ├── Release
+│       └── Release.gpg
+├── pool
+│   └── main
+│       ├── picoscenes-driver-20191229.deb
+│       ├── picoscenes-platform-2020.0816.1248-Linux.deb
+│       └── picoscenes-plugins-demo-rxsbroadcaster-echoprobe-20.0718.0252-Linux.deb
+└── project
+    └── ppa-public-key.gpg<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<h3 id="4-使用定制软件仓库安装软件"><a href="#4-使用定制软件仓库安装软件" class="headerlink" title="4.使用定制软件仓库安装软件"></a>4.使用定制软件仓库安装软件</h3><p>当搭建软件仓库成功后，在浏览器访问服务器IP或者访问对应域名，可以看见类似如图2所示内容：</p>
+<p><img src="https://zpj.io/wp-content/uploads/2020/10/gpg-success.png"></p>
+<p>图2-浏览器访问界面</p>
+<p>这时其他用户就可以使用你定制的PPA，具体操作如下：</p>
+<h4 id="1-添加密钥"><a href="#1-添加密钥" class="headerlink" title="1.添加密钥"></a>1.添加密钥</h4><pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 添加密钥(q后为大写英文字母O)</span>
+$ <span class="token function">wget</span> -qO- https://服务器地址/project/ppa-public-key.gpg  <span class="token function">sudo</span> apt-key <span class="token function">add</span> -
+OK<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+
+<p>显示OK即可，这时可以通过apt-key list可以查看已经信任的密钥：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 显示信任密钥</span>
+$ apt-key list
+
+/etc/apt/trusted.gpg
+--------------------
+<span class="token punctuation">..</span>.
+pub   rsa4096 <span class="token number">2020</span>-09-08 <span class="token punctuation">[</span>SC<span class="token punctuation">]</span>
+      DF43 1E9A FB95 3A97 7D83  071A 7B26 77D0 <span class="token number">4250</span> EA0E
+uid           <span class="token punctuation">[</span> unknown<span class="token punctuation">]</span> PPA-Demo <span class="token punctuation">(</span>NO<span class="token punctuation">)</span> <span class="token operator">&lt;</span>XX@XXX.com<span class="token operator">></span>
+sub   rsa4096 <span class="token number">2020</span>-09-08 <span class="token punctuation">[</span>E<span class="token punctuation">]</span>
+<span class="token punctuation">..</span>.
+/etc/apt/trusted.gpg.d/ubuntu-keyring-2012-archive.gpg
+------------------------------------------------------
+pub   rsa4096 <span class="token number">2012</span>-05-11 <span class="token punctuation">[</span>SC<span class="token punctuation">]</span>
+      790B C727 <span class="token number">7767</span> 219C 42C8  6F93 3B4F E6AC C0B2 1F32
+uid           <span class="token punctuation">[</span> unknown<span class="token punctuation">]</span> Ubuntu Archive Automatic Signing Key <span class="token punctuation">(</span><span class="token number">2012</span><span class="token punctuation">)</span> <span class="token operator">&lt;</span>ftpmaster@ubuntu.com<span class="token operator">></span>
+/etc/apt/trusted.gpg.d/ubuntu-keyring-2012-cdimage.gpg
+------------------------------------------------------
+pub   rsa4096 <span class="token number">2012</span>-05-11 <span class="token punctuation">[</span>SC<span class="token punctuation">]</span>
+      <span class="token number">8439</span> 38DF 228D 22F7 B374  2BC0 D94A A3F0 EFE2 <span class="token number">1092</span>
+uid           <span class="token punctuation">[</span> unknown<span class="token punctuation">]</span> Ubuntu CD Image Automatic Signing Key <span class="token punctuation">(</span><span class="token number">2012</span><span class="token punctuation">)</span> <span class="token operator">&lt;</span>cdimage@ubuntu.com<span class="token operator">></span>
+<span class="token punctuation">..</span>.
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>可以看到其中有我们在服务器端生成的密钥，这表示此时PC机信任来自这个服务器密钥生成的配置信息。在添加密钥之后便可以添加软件仓库。</p>
+<h4 id="２-添加软件仓库"><a href="#２-添加软件仓库" class="headerlink" title="２.添加软件仓库"></a>２.添加软件仓库</h4><p>添加软件仓库的命令add-apt-repository在软件包software-properties-common中，确保你的服务器已经安装software-properties-common，若没有安装，执行sudo apt install software-properties-common进行安装。<br>安装完成之后，执行如下命令添加软件仓库：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 添加软件仓库</span>
+$ <span class="token function">sudo</span> add-apt-repository <span class="token string">'deb [arch=amd64] https://服务器地址/ stable main'</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+
+<p>添加之后如果执行sudo apt update将会看见你的服务器地址出现在列表中，类似如下：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 更新源</span>
+
+$ <span class="token function">sudo</span> <span class="token function">apt</span> update
+<span class="token punctuation">..</span>.
+Ign:16 https://服务器地址 stable InRelease                                     
+Get:17 https://服务器地址 stable Release <span class="token punctuation">[</span><span class="token number">1,896</span> B<span class="token punctuation">]</span>                             
+Get:19 https://服务器地址 stable Release.gpg <span class="token punctuation">[</span><span class="token number">659</span> B<span class="token punctuation">]</span>                           
+Get:20 https://服务器地址 stable/main amd64 Packages <span class="token punctuation">[</span><span class="token number">1,690</span> B<span class="token punctuation">]</span>  
+<span class="token punctuation">..</span>.
+Reading package lists<span class="token punctuation">..</span>. Done                                    
+Building dependency tree       
+Reading state information<span class="token punctuation">..</span>. Done
+All packages are up to date.<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>这表明添加密钥及软件仓库成功，此后，就可以在终端直接sudo apt install xxx来安装你定制的软件。</p>
+<h4 id="3-移除密钥以及软件仓库"><a href="#3-移除密钥以及软件仓库" class="headerlink" title="3.移除密钥以及软件仓库"></a>3.移除密钥以及软件仓库</h4><p>当出于某种原因需要移除密钥和软件仓库时，可以执行如下代码：</p>
+<pre class="line-numbers language-bash" data-language="bash"><code class="language-bash"><span class="token comment"># 移除密钥(引号中的值即为apt-key list中显示的一长串字母数字的组合)</span>
+$ <span class="token function">sudo</span> apt-key del <span class="token string">'DF43 1E9A FB95 3A97 7D83  071A 7B26 77D0 4250 EA0E'</span>
+OK
+
+<span class="token comment"># 移除软件仓库</span>
+<span class="token function">sudo</span> apt-add-repository -r <span class="token string">'deb [arch=amd64] https://服务器地址/ stable main'</span><span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>两步都成功后，定制软件仓库完整的从本地移除，之后执行一次apt update来更新一下源仓库的配置信息即可。<br>对于基于ubuntu的发行版的linux机器，例如Linux mint20.04，可以在软件源(Software Sources)中进行移除软件仓库和认证密钥，如图3所示：</p>
+<p><img src="https://zpj.io/wp-content/uploads/2020/10/ppa-software-resources-del.png"></p>
+<p>图3-移除仓库和密钥</p>
+<p>至此，一个完整的定制软件仓库生成，使用以及移除全部完成。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Setup/" rel="tag"># Setup</a>
+              <a href="/tags/Ubuntu/" rel="tag"># Ubuntu</a>
+              <a href="/tags/3rd-party-PPA/" rel="tag"># 3rd-party PPA</a>
+              <a href="/tags/apt-install/" rel="tag"># apt install</a>
+              <a href="/tags/Software-Source/" rel="tag"># Software Source</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/08/25/install-wordpress-org-on-ubuntu-20-04/" rel="prev" title="如何在Ubuntu20.04服务器上搭建WordPress.org网站">
+                  <i class="fa fa-chevron-left"></i> 如何在Ubuntu20.04服务器上搭建WordPress.org网站
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/11/17/hello-world/" rel="next" title="Hello World">
+                  Hello World <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      
+
+      
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+<script src="/js/prism/prism.js" async></script>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.0/lib/anime.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
